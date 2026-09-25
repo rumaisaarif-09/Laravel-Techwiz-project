@@ -9,12 +9,11 @@ class Category extends Model
 {
     protected $fillable = [
         'name',
+        'slug',
     ];
 
-    // Category ke andar mojood products ka relation
     public function products()
     {
         return $this->hasMany(Product::class);
     }
 }
-

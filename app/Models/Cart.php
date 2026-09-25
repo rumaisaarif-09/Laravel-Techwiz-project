@@ -4,20 +4,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use App\Models\Product;
 
-class Order extends Model
+class Cart extends Model
 {
     protected $fillable = [
         'user_id',
-        'total_amount',
-        'payment_method',
-        'status',
-        'shipping_address',
-        'phone',
+        'product_id',
+        'quantity',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
     }
 }
