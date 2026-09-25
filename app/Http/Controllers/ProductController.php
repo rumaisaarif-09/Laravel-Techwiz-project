@@ -10,16 +10,38 @@ use Illuminate\Support\Facades\Storage;
 class ProductController extends Controller
 {
     /**
-     * Farmer ke apne products show karna
+     * vendor dashboard show karna
      */
-    public function index()
+    public function dashboard()
     {
-        $products = Product::where('user_id', auth()->id())
+        $products = Product::where('user_id', 1)
             ->with('category')
             ->latest()
             ->get();
 
-        return view('farmer.products.index', compact('products'));
+        $totalProducts = $products->count();
+        $pendingProducts = $products->where('status', 'pending')->count();
+        $approvedProducts = $products->where('status', 'approved')->count();
+
+        return view('vendor.dashboard', compact(
+            'products',
+            'totalProducts',
+            'pendingProducts',
+            'approvedProducts'
+        ));
+    }
+
+    /**
+     * vendor ke apne products show karna
+     */
+    public function index()
+    {
+        $products = Product::where('user_id', 1)
+            ->with('category')
+            ->latest()
+            ->get();
+
+        return view('vendor.products.index', compact('products'));
     }
 
     /**
@@ -29,7 +51,7 @@ class ProductController extends Controller
     {
         $categories = Category::all();
 
-        return view('farmer.products.create', compact('categories'));
+        return view('vendor.products.create', compact('categories'));
     }
 
     /**
@@ -48,7 +70,7 @@ class ProductController extends Controller
 
         $imagePath = null;
 
-        // Image local storage mein save karna
+        // Image ko local storage mein save karna
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store(
                 'products',
@@ -57,7 +79,7 @@ class ProductController extends Controller
         }
 
         Product::create([
-            'user_id' => auth()->id(),
+            'user_id' => 1,
             'category_id' => $request->category_id,
             'name' => $request->name,
             'description' => $request->description,
@@ -73,29 +95,29 @@ class ProductController extends Controller
     }
 
     /**
-     * Product ki details show karna
+     * Product ki complete details show karna
      */
     public function show(string $id)
     {
-        $product = Product::where('user_id', auth()->id())
+        $product = Product::where('user_id', 1)
             ->with('category')
             ->findOrFail($id);
 
-        return view('farmer.products.show', compact('product'));
+        return view('vendor.products.show', compact('product'));
     }
 
     /**
-     * Farmer ke apne product ka edit form show karna
+     * vendor ke apne product ka edit form show karna
      */
     public function edit(string $id)
     {
-        $product = Product::where('user_id', auth()->id())
+        $product = Product::where('user_id', 1)
             ->findOrFail($id);
 
         $categories = Category::all();
 
         return view(
-            'farmer.products.edit',
+            'vendor.products.edit',
             compact('product', 'categories')
         );
     }
@@ -105,7 +127,7 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $product = Product::where('user_id', auth()->id())
+        $product = Product::where('user_id', 1)
             ->findOrFail($id);
 
         $request->validate([
@@ -117,7 +139,7 @@ class ProductController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        // Nayi image upload hone par purani image delete karna
+        // Nayi image upload ho to purani image delete karna
         if ($request->hasFile('image')) {
 
             if ($product->image) {
@@ -148,10 +170,10 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        $product = Product::where('user_id', auth()->id())
+        $product = Product::where('user_id', 1)
             ->findOrFail($id);
 
-        // Product ke saath image bhi delete karna
+        // Product ke saath uski image bhi delete karna
         if ($product->image) {
             Storage::disk('public')->delete($product->image);
         }
@@ -163,4 +185,3 @@ class ProductController extends Controller
             ->with('success', 'Product deleted successfully.');
     }
 }
-
